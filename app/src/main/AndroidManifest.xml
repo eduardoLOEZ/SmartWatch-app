@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.myapplication_wearable">
 
@@ -26,11 +25,11 @@
             </intent-filter>
         </activity>
 
+        <service android:name=".presentation.ImageReceiverService" android:exported="true"/>
 
         <meta-data
             android:name="com.google.android.wearable.standalone"
             android:value="true" />
 
     </application>
-
 </manifest>

@@ -23,3 +23,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "MiAplicacionWearable"
 include(":app")
+include(":app:mobile")
