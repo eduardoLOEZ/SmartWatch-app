@@ -17,9 +17,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.mobile.ui.theme.MiAplicacionWearableTheme
-import com.google.android.gms.wearable.DataClient
-import com.google.android.gms.wearable.PutDataMapRequest
-import com.google.android.gms.wearable.Wearable
+import com.google.android.gms.tasks.Task
+import com.google.android.gms.wearable.*
+
 import java.io.ByteArrayOutputStream
 
 class MainActivity : ComponentActivity() {
@@ -39,7 +39,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContent {
             MiAplicacionWearableTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
@@ -53,19 +52,22 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun enableEdgeToEdge() {
-        // Implementación pendiente
-    }
-
     private fun sendImageToWearable(bitmap: Bitmap) {
-        val dataClient: DataClient = Wearable.getDataClient(this)
-        val path = "/image"
-        val dataMapRequest = PutDataMapRequest.create(path)
-        val byteArrayOutputStream = ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream)
-        dataMapRequest.dataMap.putByteArray("image", byteArrayOutputStream.toByteArray())
-        val putDataRequest = dataMapRequest.asPutDataRequest().setUrgent()
-        dataClient.putDataItem(putDataRequest)
+        val nodeClient: NodeClient = Wearable.getNodeClient(this)
+        val nodesTask: Task<List<Node>> = nodeClient.connectedNodes
+        nodesTask.addOnSuccessListener { nodes ->
+            for (node in nodes) {
+                val byteArrayOutputStream = ByteArrayOutputStream()
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream)
+                val byteArray = byteArrayOutputStream.toByteArray()
+
+                val putDataMapRequest = PutDataMapRequest.create("/image")
+                putDataMapRequest.dataMap.putByteArray("image", byteArray)
+                val putDataRequest = putDataMapRequest.asPutDataRequest().setUrgent()
+
+                Wearable.getDataClient(this).putDataItem(putDataRequest)
+            }
+        }
     }
 }
 
